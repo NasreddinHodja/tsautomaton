@@ -122,9 +122,19 @@ function tsautomatonEntryPoint() {
     if (nextButton === null) {
         throw new Error(`Could not find button ${nextButtonId}`);
     }
+    const playButtonId = "play";
+    const playButton = document.getElementById(playButtonId);
+    if (playButton === null) {
+        throw new Error(`Could not find button ${playButtonId}`);
+    }
+    const stopButtonId = "stop";
+    const stopButton = document.getElementById(stopButtonId);
+    if (stopButton === null) {
+        throw new Error(`Could not find button ${stopButtonId}`);
+    }
     const CELL_WIDTH = app.width / BOARD_COLS;
     const CELL_HEIGHT = app.height / BOARD_ROWS;
-    const currentAutomaton = BB;
+    const currentAutomaton = Seeds;
     let currentBoard = createBoard();
     let nextBoard = createBoard();
     app.addEventListener("click", (e) => {
@@ -139,10 +149,24 @@ function tsautomatonEntryPoint() {
             }
         }
     });
-    nextButton.addEventListener("click", () => {
+    const step = () => {
         computeNextBoard(currentAutomaton, currentBoard, nextBoard);
         [currentBoard, nextBoard] = [nextBoard, currentBoard];
         render(ctx, currentAutomaton, currentBoard);
+    };
+    nextButton.addEventListener("click", step);
+    let intervalId = null;
+    let stepInterval = 50;
+    playButton.addEventListener("click", () => {
+        if (intervalId === null) {
+            intervalId = setInterval(step, stepInterval);
+        }
+    });
+    stopButton.addEventListener("click", () => {
+        if (intervalId !== null) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
     });
     render(ctx, currentAutomaton, currentBoard);
 }
