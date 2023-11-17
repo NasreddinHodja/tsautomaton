@@ -1,20 +1,8 @@
-const BOARD_ROWS = 32;
-const BOARD_COLS = 32;
+const BOARD_ROWS = 64;
+const BOARD_COLS = 64;
 
-type State = number;
-type Board = State[][];
-
-const stateColors = [
-  "#282A36",
-  "#F8F8F2",
-  "#8be9fd",
-  "#50fa7b",
-  "#ffb86c",
-  "#ff79c6",
-  "#bd93f9",
-  "#ff5555",
-  "#f1fa8c",
-];
+type Cell = number;
+type Board = Cell[][];
 
 function createBoard(): Board {
   const board: Board = [];
@@ -46,15 +34,19 @@ if (nextButton === null) {
 const CELL_WIDTH = app.width / BOARD_COLS;
 const CELL_HEIGHT = app.height / BOARD_ROWS;
 
-function render(ctx: CanvasRenderingContext2D, board: Board) {
-  ctx.fillStyle = stateColors[0];
+function render(
+  ctx: CanvasRenderingContext2D,
+  automaton: Automaton,
+  board: Board
+) {
+  ctx.fillStyle = automaton[0].color;
   ctx.fillRect(0, 0, app.width, app.height);
 
   for (let r = 0; r < BOARD_ROWS; r++) {
     for (let c = 0; c < BOARD_ROWS; c++) {
       const x = c * CELL_WIDTH;
       const y = r * CELL_HEIGHT;
-      ctx.fillStyle = stateColors[board[r][c]];
+      ctx.fillStyle = automaton[board[r][c]].color;
       ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
     }
   }
@@ -77,51 +69,68 @@ function countNbors(board: Board, nbors: number[], r0: number, c0: number) {
   }
 }
 
-interface Transition {
-  [key: string]: number;
+interface State {
+  color: string;
   default: number;
+  transitions: {
+    [key: string]: number;
+  };
 }
 
-type Automaton = Transition[];
+type Automaton = State[];
 
 const GoL: Automaton = [
   {
-    "53": 1,
+    transitions: { "53": 1 },
     default: 0,
+    color: "#282A36",
   },
   {
-    "53": 1,
-    "62": 1,
+    transitions: {
+      "53": 1,
+      "62": 1,
+    },
     default: 0,
+    color: "#F8F8F2",
   },
 ];
 
 const Seeds: Automaton = [
   {
-    "62": 1,
+    transitions: { "62": 1 },
     default: 0,
+    color: "#282A36",
   },
   {
+    transitions: {},
     default: 0,
+    color: "#F8F8F2",
   },
 ];
 
 const BB: Automaton = [
   {
-    "026": 1,
-    "125": 1,
-    "224": 1,
-    "323": 1,
-    "422": 1,
-    "521": 1,
-    "620": 1,
+    transitions: {
+      "026": 1,
+      "125": 1,
+      "224": 1,
+      "323": 1,
+      "422": 1,
+      "521": 1,
+      "620": 1,
+    },
     default: 0,
+    color: "#282A36",
   },
   {
+    transitions: {},
     default: 2,
+    color: "#F8F8F2",
   },
   {
+    transitions: {},
     default: 0,
+    color: "#8be9fd",
   },
 ];
 
@@ -130,12 +139,14 @@ function computeNextBoard(automaton: Automaton, current: Board, next: Board) {
   for (let r = 0; r < BOARD_ROWS; r++) {
     for (let c = 0; c < BOARD_ROWS; c++) {
       countNbors(current, nbors, r, c);
-      const transition = automaton[current[r][c]];
-      next[r][c] = transition[nbors.join("")];
-      if (next[r][c] === undefined) next[r][c] = transition["default"];
+      const state = automaton[current[r][c]];
+      next[r][c] = state.transitions[nbors.join("")];
+      if (next[r][c] === undefined) next[r][c] = state["default"];
     }
   }
 }
+
+const currentAutomaton = BB;
 
 app.addEventListener("click", (e) => {
   const row = Math.floor(e.offsetY / CELL_HEIGHT);
@@ -145,16 +156,16 @@ app.addEventListener("click", (e) => {
   for (let i = 0; i < states.length; i++) {
     if ((states[i] as HTMLInputElement).checked) {
       currentBoard[row][col] = i;
-      render(ctx, currentBoard);
+      render(ctx, currentAutomaton, currentBoard);
       return;
     }
   }
 });
 
 nextButton.addEventListener("click", () => {
-  computeNextBoard(BB, currentBoard, nextBoard);
+  computeNextBoard(currentAutomaton, currentBoard, nextBoard);
   [currentBoard, nextBoard] = [nextBoard, currentBoard];
-  render(ctx, currentBoard);
+  render(ctx, currentAutomaton, currentBoard);
 });
 
-render(ctx, currentBoard);
+render(ctx, currentAutomaton, currentBoard);
