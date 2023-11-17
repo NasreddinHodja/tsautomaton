@@ -4,52 +4,6 @@ const BOARD_COLS = 64;
 type Cell = number;
 type Board = Cell[][];
 
-function createBoard(): Board {
-  const board: Board = [];
-  for (let i = 0; i < BOARD_ROWS; i++) {
-    board.push(new Array<Cell>(BOARD_COLS).fill(0));
-  }
-  return board;
-}
-
-function mod(a: number, b: number): number {
-  return ((a % b) + b) % b;
-}
-
-function countNbors(board: Board, nbors: number[], r0: number, c0: number) {
-  nbors.fill(0);
-  for (let dr = -1; dr <= 1; dr++) {
-    for (let dc = -1; dc <= 1; dc++) {
-      if (dr === 0 && dc === 0) continue;
-      let r = (r0 + dr) % BOARD_ROWS;
-      let c = (c0 + dc) % BOARD_COLS;
-      if (r < 0) r += BOARD_ROWS;
-      if (c < 0) c += BOARD_COLS;
-      nbors[board[r][c]]++;
-    }
-  }
-}
-
-function render(
-  ctx: CanvasRenderingContext2D,
-  automaton: Automaton,
-  board: Board
-) {
-  const CELL_WIDTH = ctx.canvas.width / BOARD_COLS;
-  const CELL_HEIGHT = ctx.canvas.height / BOARD_ROWS;
-
-  ctx.fillStyle = automaton[0].color;
-  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  for (let r = 0; r < BOARD_ROWS; r++) {
-    for (let c = 0; c < BOARD_ROWS; c++) {
-      const x = c * CELL_WIDTH;
-      const y = r * CELL_HEIGHT;
-      ctx.fillStyle = automaton[board[r][c]].color;
-      ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
-    }
-  }
-}
-
 interface State {
   color: string;
   default: number;
@@ -115,6 +69,32 @@ const BB: Automaton = [
   },
 ];
 
+function createBoard(): Board {
+  const board: Board = [];
+  for (let i = 0; i < BOARD_ROWS; i++) {
+    board.push(new Array<Cell>(BOARD_COLS).fill(0));
+  }
+  return board;
+}
+
+function mod(a: number, b: number): number {
+  return ((a % b) + b) % b;
+}
+
+function countNbors(board: Board, nbors: number[], r0: number, c0: number) {
+  nbors.fill(0);
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      let r = (r0 + dr) % BOARD_ROWS;
+      let c = (c0 + dc) % BOARD_COLS;
+      if (r < 0) r += BOARD_ROWS;
+      if (c < 0) c += BOARD_COLS;
+      nbors[board[r][c]]++;
+    }
+  }
+}
+
 function computeNextBoard(automaton: Automaton, current: Board, next: Board) {
   const nbors = new Array(automaton.length).fill(0);
   for (let r = 0; r < BOARD_ROWS; r++) {
@@ -127,7 +107,27 @@ function computeNextBoard(automaton: Automaton, current: Board, next: Board) {
   }
 }
 
-window.onload = () => {
+function render(
+  ctx: CanvasRenderingContext2D,
+  automaton: Automaton,
+  board: Board
+) {
+  const CELL_WIDTH = ctx.canvas.width / BOARD_COLS;
+  const CELL_HEIGHT = ctx.canvas.height / BOARD_ROWS;
+
+  ctx.fillStyle = automaton[0].color;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  for (let r = 0; r < BOARD_ROWS; r++) {
+    for (let c = 0; c < BOARD_ROWS; c++) {
+      const x = c * CELL_WIDTH;
+      const y = r * CELL_HEIGHT;
+      ctx.fillStyle = automaton[board[r][c]].color;
+      ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
+    }
+  }
+}
+
+function tsautomatonEntryPoint() {
   const canvasId = "app";
   const app = document.getElementById(canvasId) as HTMLCanvasElement;
   if (app === null) {
@@ -175,4 +175,6 @@ window.onload = () => {
   });
 
   render(ctx, currentAutomaton, currentBoard);
-};
+}
+
+window.onload = tsautomatonEntryPoint;

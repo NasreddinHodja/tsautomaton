@@ -1,46 +1,6 @@
 "use strict";
 const BOARD_ROWS = 64;
 const BOARD_COLS = 64;
-function createBoard() {
-    const board = [];
-    for (let i = 0; i < BOARD_ROWS; i++) {
-        board.push(new Array(BOARD_COLS).fill(0));
-    }
-    return board;
-}
-function mod(a, b) {
-    return ((a % b) + b) % b;
-}
-function countNbors(board, nbors, r0, c0) {
-    nbors.fill(0);
-    for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-            if (dr === 0 && dc === 0)
-                continue;
-            let r = (r0 + dr) % BOARD_ROWS;
-            let c = (c0 + dc) % BOARD_COLS;
-            if (r < 0)
-                r += BOARD_ROWS;
-            if (c < 0)
-                c += BOARD_COLS;
-            nbors[board[r][c]]++;
-        }
-    }
-}
-function render(ctx, automaton, board) {
-    const CELL_WIDTH = ctx.canvas.width / BOARD_COLS;
-    const CELL_HEIGHT = ctx.canvas.height / BOARD_ROWS;
-    ctx.fillStyle = automaton[0].color;
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        for (let c = 0; c < BOARD_ROWS; c++) {
-            const x = c * CELL_WIDTH;
-            const y = r * CELL_HEIGHT;
-            ctx.fillStyle = automaton[board[r][c]].color;
-            ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
-        }
-    }
-}
 const GoL = [
     {
         transitions: { "53": 1 },
@@ -93,6 +53,32 @@ const BB = [
         color: "#8be9fd",
     },
 ];
+function createBoard() {
+    const board = [];
+    for (let i = 0; i < BOARD_ROWS; i++) {
+        board.push(new Array(BOARD_COLS).fill(0));
+    }
+    return board;
+}
+function mod(a, b) {
+    return ((a % b) + b) % b;
+}
+function countNbors(board, nbors, r0, c0) {
+    nbors.fill(0);
+    for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0)
+                continue;
+            let r = (r0 + dr) % BOARD_ROWS;
+            let c = (c0 + dc) % BOARD_COLS;
+            if (r < 0)
+                r += BOARD_ROWS;
+            if (c < 0)
+                c += BOARD_COLS;
+            nbors[board[r][c]]++;
+        }
+    }
+}
 function computeNextBoard(automaton, current, next) {
     const nbors = new Array(automaton.length).fill(0);
     for (let r = 0; r < BOARD_ROWS; r++) {
@@ -105,7 +91,21 @@ function computeNextBoard(automaton, current, next) {
         }
     }
 }
-window.onload = () => {
+function render(ctx, automaton, board) {
+    const CELL_WIDTH = ctx.canvas.width / BOARD_COLS;
+    const CELL_HEIGHT = ctx.canvas.height / BOARD_ROWS;
+    ctx.fillStyle = automaton[0].color;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_ROWS; c++) {
+            const x = c * CELL_WIDTH;
+            const y = r * CELL_HEIGHT;
+            ctx.fillStyle = automaton[board[r][c]].color;
+            ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
+        }
+    }
+}
+function tsautomatonEntryPoint() {
     const canvasId = "app";
     const app = document.getElementById(canvasId);
     if (app === null) {
@@ -145,4 +145,5 @@ window.onload = () => {
         render(ctx, currentAutomaton, currentBoard);
     });
     render(ctx, currentAutomaton, currentBoard);
-};
+}
+window.onload = tsautomatonEntryPoint;
