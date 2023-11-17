@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Cellular Automaton</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+  <body>
+    <h1>Cellular Automaton</h1>
+    <p><button id="next">Next</button></p>
+    <fieldset>
+      <legend>State:</legend>
+      <div>
+        <input type="radio" id="dead" name="state" value="0" />
+        <label for="dead">Dead</label>
+        <input type="radio" id="alive" name="state" value="1" checked />
+        <label for="alive">Alive</label>
+      </div>
+    </fieldset>
+    <canvas id="app"></canvas>
+    <script src="index.js"></script>
+  </body>
+</html>
