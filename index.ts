@@ -1,5 +1,5 @@
-const BOARD_ROWS = 64;
-const BOARD_COLS = 64;
+const BOARD_ROWS = 128;
+const BOARD_COLS = 128;
 
 type Cell = number;
 type Board = Cell[][];
@@ -160,7 +160,7 @@ function tsautomatonEntryPoint() {
   const CELL_WIDTH = app.width / BOARD_COLS;
   const CELL_HEIGHT = app.height / BOARD_ROWS;
 
-  const currentAutomaton = Seeds;
+  const currentAutomaton = BB;
   let currentBoard = createBoard();
   let nextBoard = createBoard();
 

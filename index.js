@@ -1,6 +1,6 @@
 "use strict";
-const BOARD_ROWS = 64;
-const BOARD_COLS = 64;
+const BOARD_ROWS = 128;
+const BOARD_COLS = 128;
 const GoL = [
     {
         transitions: { "53": 1 },
@@ -134,7 +134,7 @@ function tsautomatonEntryPoint() {
     }
     const CELL_WIDTH = app.width / BOARD_COLS;
     const CELL_HEIGHT = app.height / BOARD_ROWS;
-    const currentAutomaton = Seeds;
+    const currentAutomaton = BB;
     let currentBoard = createBoard();
     let nextBoard = createBoard();
     app.addEventListener("click", (e) => {
