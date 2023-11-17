@@ -8,38 +8,9 @@ function createBoard() {
     }
     return board;
 }
-const canvasId = "app";
-const app = document.getElementById(canvasId);
-if (app === null) {
-    throw new Error(`Could not find canvas ${canvasId}`);
+function mod(a, b) {
+    return ((a % b) + b) % b;
 }
-app.width = 800;
-app.height = 800;
-const ctx = app.getContext("2d");
-if (ctx === null) {
-    throw new Error("Could not initialize 2d context");
-}
-const nextButtonId = "next";
-const nextButton = document.getElementById(nextButtonId);
-if (nextButton === null) {
-    throw new Error(`Could not find button ${nextButtonId}`);
-}
-const CELL_WIDTH = app.width / BOARD_COLS;
-const CELL_HEIGHT = app.height / BOARD_ROWS;
-function render(ctx, automaton, board) {
-    ctx.fillStyle = automaton[0].color;
-    ctx.fillRect(0, 0, app.width, app.height);
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        for (let c = 0; c < BOARD_ROWS; c++) {
-            const x = c * CELL_WIDTH;
-            const y = r * CELL_HEIGHT;
-            ctx.fillStyle = automaton[board[r][c]].color;
-            ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
-        }
-    }
-}
-let currentBoard = createBoard();
-let nextBoard = createBoard();
 function countNbors(board, nbors, r0, c0) {
     nbors.fill(0);
     for (let dr = -1; dr <= 1; dr++) {
@@ -53,6 +24,20 @@ function countNbors(board, nbors, r0, c0) {
             if (c < 0)
                 c += BOARD_COLS;
             nbors[board[r][c]]++;
+        }
+    }
+}
+function render(ctx, automaton, board) {
+    const CELL_WIDTH = ctx.canvas.width / BOARD_COLS;
+    const CELL_HEIGHT = ctx.canvas.height / BOARD_ROWS;
+    ctx.fillStyle = automaton[0].color;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_ROWS; c++) {
+            const x = c * CELL_WIDTH;
+            const y = r * CELL_HEIGHT;
+            ctx.fillStyle = automaton[board[r][c]].color;
+            ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
         }
     }
 }
@@ -120,22 +105,44 @@ function computeNextBoard(automaton, current, next) {
         }
     }
 }
-const currentAutomaton = BB;
-app.addEventListener("click", (e) => {
-    const row = Math.floor(e.offsetY / CELL_HEIGHT);
-    const col = Math.floor(e.offsetX / CELL_WIDTH);
-    const states = document.getElementsByName("state");
-    for (let i = 0; i < states.length; i++) {
-        if (states[i].checked) {
-            currentBoard[row][col] = i;
-            render(ctx, currentAutomaton, currentBoard);
-            return;
-        }
+window.onload = () => {
+    const canvasId = "app";
+    const app = document.getElementById(canvasId);
+    if (app === null) {
+        throw new Error(`Could not find canvas ${canvasId}`);
     }
-});
-nextButton.addEventListener("click", () => {
-    computeNextBoard(currentAutomaton, currentBoard, nextBoard);
-    [currentBoard, nextBoard] = [nextBoard, currentBoard];
+    app.width = 800;
+    app.height = 800;
+    const ctx = app.getContext("2d");
+    if (ctx === null) {
+        throw new Error("Could not initialize 2d context");
+    }
+    const nextButtonId = "next";
+    const nextButton = document.getElementById(nextButtonId);
+    if (nextButton === null) {
+        throw new Error(`Could not find button ${nextButtonId}`);
+    }
+    const CELL_WIDTH = app.width / BOARD_COLS;
+    const CELL_HEIGHT = app.height / BOARD_ROWS;
+    const currentAutomaton = BB;
+    let currentBoard = createBoard();
+    let nextBoard = createBoard();
+    app.addEventListener("click", (e) => {
+        const row = Math.floor(e.offsetY / CELL_HEIGHT);
+        const col = Math.floor(e.offsetX / CELL_WIDTH);
+        const states = document.getElementsByName("state");
+        for (let i = 0; i < states.length; i++) {
+            if (states[i].checked) {
+                currentBoard[row][col] = i;
+                render(ctx, currentAutomaton, currentBoard);
+                return;
+            }
+        }
+    });
+    nextButton.addEventListener("click", () => {
+        computeNextBoard(currentAutomaton, currentBoard, nextBoard);
+        [currentBoard, nextBoard] = [nextBoard, currentBoard];
+        render(ctx, currentAutomaton, currentBoard);
+    });
     render(ctx, currentAutomaton, currentBoard);
-});
-render(ctx, currentAutomaton, currentBoard);
+};
