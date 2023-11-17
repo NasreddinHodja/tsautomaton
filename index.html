@@ -9,17 +9,23 @@
   </head>
   <body>
     <h1>Cellular Automaton</h1>
-    <p><button id="next">Next</button></p>
-    <fieldset>
-      <legend>State:</legend>
-      <div>
-        <input type="radio" id="dead" name="state" value="0" />
-        <label for="dead">Dead</label>
-        <input type="radio" id="alive" name="state" value="1" checked />
-        <label for="alive">Alive</label>
+    <div id="container">
+      <canvas id="app"></canvas>
+      <div id="ui">
+        <p><button id="next">Next</button></p>
+        <fieldset id="state-selector">
+          <legend>State:</legend>
+          <div>
+            <input type="radio" id="dead" name="state" value="0" />
+            <label for="dead">Dead</label>
+          </div>
+          <div>
+            <input type="radio" id="alive" name="state" value="1" checked />
+            <label for="alive">Alive</label>
+          </div>
+        </fieldset>
       </div>
-    </fieldset>
-    <canvas id="app"></canvas>
-    <script src="index.js"></script>
+      <script src="index.js"></script>
+    </div>
   </body>
 </html>
