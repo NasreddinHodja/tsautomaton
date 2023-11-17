@@ -52,12 +52,10 @@ function render(ctx: CanvasRenderingContext2D, board: Board) {
 
   for (let r = 0; r < BOARD_ROWS; r++) {
     for (let c = 0; c < BOARD_ROWS; c++) {
-      if (board[r][c] === 1) {
-        const x = c * CELL_WIDTH;
-        const y = r * CELL_HEIGHT;
-        ctx.fillStyle = stateColors[board[r][c]];
-        ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
-      }
+      const x = c * CELL_WIDTH;
+      const y = r * CELL_HEIGHT;
+      ctx.fillStyle = stateColors[board[r][c]];
+      ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
     }
   }
 }
@@ -70,47 +68,71 @@ function countNbors(board: Board, nbors: number[], r0: number, c0: number) {
   for (let dr = -1; dr <= 1; dr++) {
     for (let dc = -1; dc <= 1; dc++) {
       if (dr === 0 && dc === 0) continue;
-      const r = r0 + dr;
-      const c = c0 + dc;
-      if (r < 0 || r >= BOARD_ROWS || c < 0 || c >= BOARD_COLS) continue;
+      let r = (r0 + dr) % BOARD_ROWS;
+      let c = (c0 + dc) % BOARD_COLS;
+      if (r < 0) r += BOARD_ROWS;
+      if (c < 0) c += BOARD_COLS;
       nbors[board[r][c]]++;
     }
   }
 }
 
-const GoL = [
-  [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ],
-  [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ],
+interface Transition {
+  [key: string]: number;
+  default: number;
+}
+
+type Automaton = Transition[];
+
+const GoL: Automaton = [
+  {
+    "53": 1,
+    default: 0,
+  },
+  {
+    "53": 1,
+    "62": 1,
+    default: 0,
+  },
 ];
 
-function computeNextBoardGoL(current: Board, next: Board, states: number) {
-  const DEAD = 0;
-  const ALIVE = 1;
-  const nbors = new Array(states).fill(0);
+const Seeds: Automaton = [
+  {
+    "62": 1,
+    default: 0,
+  },
+  {
+    default: 0,
+  },
+];
+
+const BB: Automaton = [
+  {
+    "026": 1,
+    "125": 1,
+    "224": 1,
+    "323": 1,
+    "422": 1,
+    "521": 1,
+    "620": 1,
+    default: 0,
+  },
+  {
+    default: 2,
+  },
+  {
+    default: 0,
+  },
+];
+
+function computeNextBoard(automaton: Automaton, current: Board, next: Board) {
+  const nbors = new Array(automaton.length).fill(0);
   for (let r = 0; r < BOARD_ROWS; r++) {
     for (let c = 0; c < BOARD_ROWS; c++) {
       countNbors(current, nbors, r, c);
-      next[r][c] = GoL[current[r][c]][nbors[DEAD]][nbors[ALIVE]];
+      const transition = automaton[current[r][c]];
+      next[r][c] = transition[nbors.join("")];
+      if (next[r][c] === undefined) next[r][c] = transition["default"];
     }
   }
 }
@@ -130,7 +152,7 @@ app.addEventListener("click", (e) => {
 });
 
 nextButton.addEventListener("click", () => {
-  computeNextBoardGoL(currentBoard, nextBoard, 2);
+  computeNextBoard(BB, currentBoard, nextBoard);
   [currentBoard, nextBoard] = [nextBoard, currentBoard];
   render(ctx, currentBoard);
 });
