@@ -1,3 +1,5 @@
+// import { Automaton, GoL, Seeds, BB } from "./automaton";
+
 const BOARD_ROWS = 128;
 const BOARD_COLS = 128;
 
@@ -86,10 +88,8 @@ function countNbors(board: Board, nbors: number[], r0: number, c0: number) {
   for (let dr = -1; dr <= 1; dr++) {
     for (let dc = -1; dc <= 1; dc++) {
       if (dr === 0 && dc === 0) continue;
-      let r = (r0 + dr) % BOARD_ROWS;
-      let c = (c0 + dc) % BOARD_COLS;
-      if (r < 0) r += BOARD_ROWS;
-      if (c < 0) c += BOARD_COLS;
+      let r = mod(r0 + dr, BOARD_ROWS);
+      let c = mod(c0 + dc, BOARD_COLS);
       nbors[board[r][c]]++;
     }
   }
